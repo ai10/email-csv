@@ -25,22 +25,20 @@
         <caption>
             <h3 class="label pull-left">Group: <span class="{{ getColor key }}">{{ key }}</span></h3>
             <div class="btn-group pull-right">
-                <button class="send-bulk-invites btn btn-sm btn-default">
-                    <span class="glyphicon glyphicon-envelope"></span>&nbsp;
-                    Invite All: {{ key }}
-                </button>
-                <button class="regroup btn btn-sm btn-default">
-                    <span class="glyphicon glyphicon-paperclip"></span>&nbsp;
-                    Re-Group All: {{ key }} 
-                </button>
-            </div>
+                 </div>
             </caption>
         <thead>
             <tr>
                 <th>Email</th>
                 <th>Registered</th>
-                <th>Invited</th>
-                <th>Group</th>
+                <th>Invited <button class="pull-right send-bulk-invites btn btn-xs btn-default">
+                    <span class="glyphicon glyphicon-envelope"></span>&nbsp;
+                    All</button>
+             </th>
+                <th>Group<button class="pull-right regroup btn btn-xs btn-default">
+                    <span class="glyphicon glyphicon-paperclip"></span>&nbsp;
+                    All</button>
+           </th>
             </tr>
         </thead>
         <tbody>
