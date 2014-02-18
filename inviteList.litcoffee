@@ -91,6 +91,8 @@ invite List controller
             if exiting? then return
             s = { user: Meteor.userId(), empty: true, group: newInviteGroup }
             emailCSVs.insert s
+            $('#collapseGroup').collapse 'hide'
+            b3.flashSuccess 'Create new group: '+newInviteGroup
 
         'keydown input.add-new-group': (e, t)->
             if e.keyCode is 13
@@ -102,6 +104,8 @@ invite List controller
                 if exiting? then return
                 s = { user: Meteor.userId(), empty: true, group: newInviteGroup }
                 emailCSVs.insert s
+                $('#collapseGroup').collapse 'hide'
+                b3.flashSuccess 'Create new group: '+newInviteGroup
 
         'keyup input.add-new-group': (e, t)->
             e.preventDefault()
@@ -110,11 +114,13 @@ invite List controller
         'click span.add-new-email': (e, t) ->
             e.stopPropagation()
             processNewEmail newEmailAddress
+            $('#collapseInvite').collapse 'hide'
 
         'keydown input.add-new-email': (e, t) ->
             if e.keyCode is 13
                 e.preventDefault()
                 processNewEmail newEmailAddress
+                $('#collapseInvite').collapse 'hide'
         
         'keyup input.add-new-email': (e, t) ->
             e.preventDefault()

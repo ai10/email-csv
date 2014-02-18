@@ -21,6 +21,7 @@ inviteListEvent
                       doc.registered = false
 
                   emailCSVs.insert doc
+                  b3.flashSuccess 'Added new email address.', { single: 'addNewEmail' }
         else
             if i is "" then return
             b3.flashError 'invalid email: '+i, { single: 'invalidEmail' }
