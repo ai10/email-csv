@@ -11,14 +11,30 @@ invite List controller
     Template.inviteList.nongroupedEmails = ->
         m = emailCSVs.find({ group: 'none'})
 
-    Template.inviteList.groups = ->
+    Template.inviteList.subgroups = (key, id)->
         g = emailCSVs.find().fetch()
         gg = _.groupBy g, 'group'
         gk = _.keys gg
         ungroupedIndex = gk.indexOf 'ungrouped'
         unless ungroupedIndex is -1
             gk.splice(ungroupedIndex, 1)
+        gk.unshift 'ungrouped'
+        _.map gk, (k)->
+            { subgroup: k, key: key, id: id }
+
+ 
+    Template.inviteList.groups = ->
+        g = emailCSVs.find().fetch()
+        fg = _.filter g, (gi)->
+            return not gi.empty
+        
+        gg = _.groupBy fg, 'group'
+        gk = _.keys gg
+        ungroupedIndex = gk.indexOf 'ungrouped'
+        unless ungroupedIndex is -1
+            gk.splice(ungroupedIndex, 1)
             gk.unshift 'ungrouped'
+
         _.map gk, (k)->
             { key: k }
 
@@ -35,8 +51,11 @@ invite List controller
         'text-info'
 
     Template.inviteList.emails = (group)->
-        g = emailCSVs.find({group: group}).fetch()
+        emails = emailCSVs.find({group: group}).fetch()
+        _.filter emails, (email)->
+            not email.empty
 
+    newInviteGroup = ""
     regroupName = ""
     newgroupName = ""
     newEmailAddress = ""
@@ -66,6 +85,28 @@ invite List controller
             else
                 emailCSVs.update { _id: @_id }, { $set: { group: 'ungrouped' }}
 
+        'click span.add-new-group': (e, t) ->
+            e.stopPropagation()
+            existing = emailCSVs.findOne { empty: true, group: newInviteGroup }
+            if exiting? then return
+            s = { user: Meteor.userId(), empty: true, group: newInviteGroup }
+            emailCSVs.insert s
+
+        'keydown input.add-new-group': (e, t)->
+            if e.keyCode is 13
+                e.preventDefault()
+                existing = emailCSVs.findOne { 
+                    empty: true
+                    group: newInviteGroup 
+                }
+                if exiting? then return
+                s = { user: Meteor.userId(), empty: true, group: newInviteGroup }
+                emailCSVs.insert s
+
+        'keyup input.add-new-group': (e, t)->
+            e.preventDefault()
+            newInviteGroup = e.target.value
+
         'click span.add-new-email': (e, t) ->
             e.stopPropagation()
             processNewEmail newEmailAddress
@@ -79,31 +120,17 @@ invite List controller
             e.preventDefault()
             newEmailAddress = e.target.value
 
-        'click button.regroup': (e, t)->
-            regroupName = @key
-            b3.Prompt {
-                text: 'Please give new group name.'
-                dialog: true
-                confirmation: true
-                headerIcon: 'glyphicon glyphicon-paperclip'
-                buttonText: 're-group'
-                buttonIcon: 'glyphicon glyphicon-paperclip'
-                legend: 'Re-group all: '+regroupName
-                type: 'info'
-                inputType: 'text'
-                selectClass: 'regroup'
-                header: 're-group'
-                label: 're-group all: '+regroupName
-                placeholder: 'new group'
-                icon: 'glyphicon glyphicon-paperclip'
-            }
-    Template.b3Prompt.events
-         'keyup input.regroup': ( e, t ) ->
-             newgroupName = e.target.value
+        'click a.group-anchor': (e, t)->
+            e.preventDefault()
+            if e.target.id is e.target.dataset.parent then return
+            originals = emailCSVs.find({ group: e.target.dataset.parent }).fetch()
+            foriginals = _.filter originals, (o)->
+                not o.empty
 
-         'click button.regroup': (e, t)->
-             originals = emailCSVs.find({ group: regroupName }).fetch()
-             originals.forEach (o)->
-                 emailCSVs.update { _id: o._id }, { $set: { group: newgroupName }}
-             b3.Prompt::clearAll()
-             b3.flashSuccess 'regrouped:'+regroupName+" to "+newgroupName
+            foriginals.forEach (o)->
+                emailCSVs.update { _id: o._id }, { $set: { group: e.target.id }}
+
+        'click a.single-group-anchor': (e, t) ->
+            e.preventDefault()
+            if e.target.id is e.target.dataset.parent then return
+            emailCSVs.update { _id: e.target.dataset.id }, { $set: { group: e.target.id }}
